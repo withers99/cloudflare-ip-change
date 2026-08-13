@@ -31,3 +31,12 @@ ip = requests.get('https://api.ipify.org').text
 for i in entries:
     if i == ip:
         found = 1
+        break
+if found == 0: 
+    items_response = client.rules.lists.items.create( 
+        list_id=list_id,
+        account_id=account_id,
+        body=[{ "ip": ip }]
+    )
+
+    
