@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
 from cloudflare import Cloudflare
-
+import requests
+# Define vairables
+found = 0
 # Load local environment variables
 load_dotenv()
 
@@ -9,7 +11,6 @@ load_dotenv()
 account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID")
 api_token= os.getenv("CLOUDFLARE_API_TOKEN")
 list_id = os.getenv("CLOUDFLARE_LIST_ID")
-print(api_token)
 if not api_token or not account_id:
     raise ValueError("Missing Cloudflare credentials in environment variables.")
 
@@ -25,4 +26,8 @@ items_response = client.rules.lists.items.list(
 
 # Put the IP's into a list
 entries = [getattr(e, "ip", None) or getattr(e, "value", None) for e in items_response if getattr(e, "ip", None) or getattr(e, "value", None)]
-print(entries)
+# Get the current public IP address
+ip = requests.get('https://api.ipify.org').text
+for i in entries:
+    if i == ip:
+        found = 1
