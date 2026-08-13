@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from cloudflare import Cloudflare
 import requests
+import subprocess
 # Define vairables
 found = 0
 # Load local environment variables
@@ -33,10 +34,26 @@ for i in entries:
         found = 1
         break
 if found == 0: 
-    items_response = client.rules.lists.items.create( 
-        list_id=list_id,
-        account_id=account_id,
-        body=[{ "ip": ip }]
-    )
+    try:
+        items_response = client.rules.lists.items.create( 
+            list_id=list_id,
+            account_id=account_id,
+            body=[{ "ip": ip }]
+        )
+        print("IP successfully added to Cloudflare list.")
+        
+    except Cloudflare.APIStatusError as e:
+        subprocess.run([
+            "/usr/local/bin/notify.sh", 
+            "Cloudflare error", 
+            "The public IP address has changed, but the script failed"
+        ])
+    else:
+        subprocess.run([
+            "/usr/local/bin/notify.sh", 
+            "Cloudflare alert", 
+            "The public IP address has changed, you need to remove the old IP!"
+        ])
+
 
     
